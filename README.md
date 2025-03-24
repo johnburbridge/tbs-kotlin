@@ -1,115 +1,119 @@
-# Time-Based Storage - Kotlin Implementation
+# Time-Based Storage (TBS)
 
 [![CI](https://github.com/johnburbridge/tbs-kotlin/actions/workflows/ci.yaml/badge.svg)](https://github.com/johnburbridge/tbs-kotlin/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/johnburbridge/tbs-kotlin/branch/main/graph/badge.svg)](https://codecov.io/gh/johnburbridge/tbs-kotlin)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Kotlin library for efficiently storing and retrieving data based on timestamps. This is a port of the Python time-based-storage library.
+A Kotlin library for storing and retrieving values based on timestamps. This library provides thread-safe implementations of time-based storage using different underlying data structures.
 
 ## Features
 
-- Store any type of data with associated timestamps
-- Multiple implementation variants optimized for different use cases:
-  - **Dictionary-based**: Simple implementation with O(1) insertion and lookup
-  - **Red-Black Tree**: Balanced performance with O(log n) for both insertion and range queries
-- Thread-safe variants for concurrent access
-- Comprehensive API for time-based operations
-- Written in idiomatic Kotlin with full generics support
+- Thread-safe time-based storage implementations
+- Support for multiple underlying data structures (HashMap, BTree, RBTree)
+- Efficient range queries and duration-based retrievals
+- Automatic timestamp collision resolution
+- Wait mechanisms for data availability
+- Comprehensive test coverage
 
 ## Installation
 
-### Gradle
+Add the following to your `build.gradle.kts`:
 
 ```kotlin
-implementation("com.github.johnburbridge:tbs-kotlin:1.0.0")
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("com.github.johnburbridge:tbs:1.0.0")
+}
 ```
 
-### Maven
+## Usage
 
-```xml
-<dependency>
-  <groupId>com.github.johnburbridge</groupId>
-  <artifactId>tbs-kotlin</artifactId>
-  <version>1.0.0</version>
-</dependency>
-```
-
-## Quick Start
+### Basic Usage
 
 ```kotlin
-import com.github.johnburbridge.tbs.TimeBasedStorages
-import java.time.Duration
+import com.github.johnburbridge.tbs.concurrent.ThreadSafeTimeBasedStorage
+import com.github.johnburbridge.tbs.core.HashMapTimeBasedStorage
 import java.time.Instant
 
-// Create a storage instance (Red-Black Tree implementation)
-val storage = TimeBasedStorages.createRBTreeStorage<String>()
+// Create a thread-safe storage using HashMap as the underlying implementation
+val storage = ThreadSafeTimeBasedStorage(HashMapTimeBasedStorage<String>())
 
-// Add events with timestamps
-val now = Instant.now()
-storage.add(now.minus(Duration.ofMinutes(30)), "Event from 30 minutes ago")
-storage.add(now.minus(Duration.ofMinutes(20)), "Event from 20 minutes ago")
-storage.add(now.minus(Duration.ofMinutes(10)), "Event from 10 minutes ago")
-storage.add(now, "Current event")
+// Add values with timestamps
+storage.add(Instant.now(), "value1")
+storage.add(Instant.now().minusSeconds(10), "value2")
 
-// Get events in a time range
-val start = now.minus(Duration.ofMinutes(25))
-val end = now.minus(Duration.ofMinutes(5))
-val rangeEvents = storage.getRange(start, end)
-println("Events between 25 and 5 minutes ago:")
-for (event in rangeEvents) {
-    println("- $event")
-}
-
-// Get events from the last 15 minutes
-val recentEvents = storage.getDuration(Duration.ofMinutes(15))
-println("Events in the last 15 minutes:")
-for (event in recentEvents) {
-    println("- $event")
-}
+// Retrieve values
+val value = storage.getValueAt(Instant.now())
+val recentValues = storage.getDuration(Duration.ofSeconds(30))
 ```
 
-## Choosing the Right Implementation
+### Available Implementations
 
-### Dictionary-Based Implementation
+1. **HashMapTimeBasedStorage**: Uses a HashMap for O(1) lookups but O(n) range queries
+2. **BTreeTimeBasedStorage**: Uses a B-tree for balanced performance across all operations
+3. **RBTreeTimeBasedStorage**: Uses a Red-Black tree for guaranteed balanced performance
 
-Best for:
-- Small to medium datasets
-- Infrequent range queries
-- Frequent direct lookups by timestamp
+### Thread Safety
+
+The library provides thread-safe wrappers for all implementations:
 
 ```kotlin
-val storage = TimeBasedStorages.createDictionaryStorage<YourDataType>()
+// Thread-safe storage
+val threadSafeStorage = ThreadSafeTimeBasedStorage(HashMapTimeBasedStorage<String>())
+
+// Safe for concurrent access
+threadSafeStorage.add(Instant.now(), "value")
 ```
 
-### Red-Black Tree Implementation
+### Advanced Features
 
-Best for:
-- Frequent range queries
-- Large datasets
-- Need for predictable performance regardless of dataset size
+#### Range Queries
 
 ```kotlin
-val storage = TimeBasedStorages.createRBTreeStorage<YourDataType>()
+val startTime = Instant.now().minusSeconds(30)
+val endTime = Instant.now()
+val valuesInRange = storage.getRange(startTime, endTime)
 ```
 
-### Thread-Safe Implementations
-
-For concurrent access from multiple threads:
+#### Duration-Based Retrieval
 
 ```kotlin
-// Thread-safe dictionary implementation
-val dictStorage = TimeBasedStorages.createThreadSafeDictionaryStorage<YourDataType>()
+// Get all values from the last 5 minutes
+val recentValues = storage.getDuration(Duration.ofMinutes(5))
+```
 
-// Thread-safe RB-Tree implementation
-val rbTreeStorage = TimeBasedStorages.createThreadSafeRBTreeStorage<YourDataType>()
+#### Timestamp Collision Resolution
+
+```kotlin
+// If a timestamp collision occurs, addUniqueTimestamp will find the next available timestamp
+val newTimestamp = storage.addUniqueTimestamp(Instant.now(), "value", 1)
+```
+
+#### Waiting for Data
+
+```kotlin
+// Wait for data with timeout
+val hasData = storage.waitForData(1000L) // Wait up to 1 second
+
+// Wait indefinitely
+storage.waitForData(null)
 ```
 
 ## Performance Characteristics
 
-| Implementation | Insertion | Lookup | Range Query |
-|----------------|-----------|--------|-------------|
-| Dictionary     | O(1)      | O(1)   | O(n)        |
-| Red-Black Tree | O(log n)  | O(log n) | O(log n + k) where k is # of items in range |
+| Operation | HashMap | BTree | RBTree |
+|-----------|---------|-------|--------|
+| Add | O(1) | O(log n) | O(log n) |
+| Get | O(1) | O(log n) | O(log n) |
+| Range Query | O(n) | O(log n + k) | O(log n + k) |
+| Memory | O(n) | O(n) | O(n) |
+
+Where:
+- n is the number of entries
+- k is the number of entries in the range
 
 ## Examples
 
@@ -144,7 +148,7 @@ storage.add(Instant.now(), "New event")
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Contributing
 
