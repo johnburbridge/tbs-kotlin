@@ -1,5 +1,9 @@
 # Time-Based Storage - Kotlin Implementation
 
+[![CI](https://github.com/johnburbridge/tbs-kotlin/actions/workflows/ci.yaml/badge.svg)](https://github.com/johnburbridge/tbs-kotlin/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/johnburbridge/tbs-kotlin/branch/main/graph/badge.svg)](https://codecov.io/gh/johnburbridge/tbs-kotlin)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A Kotlin library for efficiently storing and retrieving data based on timestamps. This is a port of the Python time-based-storage library.
 
 ## Features
