@@ -32,15 +32,11 @@ jobs:
     - name: Generate code coverage report
       run: ./gradlew jacocoTestReport
     
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: false
-        files: ./build/reports/jacoco/test/jacocoTestReport.xml
-        flags: unittests
-        name: codecov-umbrella
-        verbose: true
+        slug: johnburbridge/tbs-kotlin
 
   lint:
     runs-on: ubuntu-latest
