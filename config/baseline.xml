@@ -1,5 +1,32 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
-  <CurrentIssues></CurrentIssues>
-</SmellBaseline> 
+  <CurrentIssues>
+    <ID>ExplicitGarbageCollectionCall:PerformanceBenchmark.kt$PerformanceBenchmark$gc()</ID>
+    <ID>LongMethod:ThreadSafeTimeBasedStorageTest.kt$ThreadSafeTimeBasedStorageTest$@Test fun `test concurrent reads and writes`()</ID>
+    <ID>MatchingDeclarationName:DictionaryTimeBasedStorage.kt$HashMapTimeBasedStorage&lt;T&gt; : TimeBasedStorage</ID>
+    <ID>MaxLineLength:RBTreeExample.kt$RBTreeExample$println("Second event added with modified timestamp (offset: ${Duration.between(now, modifiedTs).toNanos()} nanoseconds)")</ID>
+    <ID>MaxLineLength:RBTreeExample.kt$RBTreeExample$println("Third event added with modified timestamp (offset: ${Duration.between(now, modifiedTs2).toNanos()} nanoseconds)")</ID>
+    <ID>NewLineAtEndOfFile:BTreeTimeBasedStorage.kt$com.github.johnburbridge.tbs.core.BTreeTimeBasedStorage.kt</ID>
+    <ID>NewLineAtEndOfFile:BTreeTimeBasedStorageTest.kt$com.github.johnburbridge.tbs.core.BTreeTimeBasedStorageTest.kt</ID>
+    <ID>NewLineAtEndOfFile:DictionaryTimeBasedStorage.kt$com.github.johnburbridge.tbs.core.DictionaryTimeBasedStorage.kt</ID>
+    <ID>NewLineAtEndOfFile:HashMapTimeBasedStorageTest.kt$com.github.johnburbridge.tbs.core.HashMapTimeBasedStorageTest.kt</ID>
+    <ID>NewLineAtEndOfFile:PerformanceBenchmark.kt$com.github.johnburbridge.tbs.examples.PerformanceBenchmark.kt</ID>
+    <ID>NewLineAtEndOfFile:RBTreeExample.kt$com.github.johnburbridge.tbs.examples.RBTreeExample.kt</ID>
+    <ID>NewLineAtEndOfFile:RBTreeTimeBasedStorage.kt$com.github.johnburbridge.tbs.core.RBTreeTimeBasedStorage.kt</ID>
+    <ID>NewLineAtEndOfFile:RBTreeTimeBasedStorageTest.kt$com.github.johnburbridge.tbs.core.RBTreeTimeBasedStorageTest.kt</ID>
+    <ID>NewLineAtEndOfFile:ThreadSafeTimeBasedStorage.kt$com.github.johnburbridge.tbs.concurrent.ThreadSafeTimeBasedStorage.kt</ID>
+    <ID>NewLineAtEndOfFile:ThreadSafeTimeBasedStorageTest.kt$com.github.johnburbridge.tbs.concurrent.ThreadSafeTimeBasedStorageTest.kt</ID>
+    <ID>NewLineAtEndOfFile:TimeBasedStorage.kt$com.github.johnburbridge.tbs.TimeBasedStorage.kt</ID>
+    <ID>NewLineAtEndOfFile:TimeBasedStorages.kt$com.github.johnburbridge.tbs.TimeBasedStorages.kt</ID>
+    <ID>NewLineAtEndOfFile:TimeBasedStoragesTest.kt$com.github.johnburbridge.tbs.TimeBasedStoragesTest.kt</ID>
+    <ID>UseRequire:BTreeTimeBasedStorage.kt$BTreeTimeBasedStorage$throw IllegalArgumentException("Value already exists at timestamp $timestamp")</ID>
+    <ID>UseRequire:DictionaryTimeBasedStorage.kt$HashMapTimeBasedStorage$throw IllegalArgumentException("Value already exists at timestamp $timestamp")</ID>
+    <ID>UseRequire:RBTreeTimeBasedStorage.kt$RBTreeTimeBasedStorage$throw IllegalArgumentException("Value already exists at timestamp $timestamp")</ID>
+    <ID>WildcardImport:BTreeTimeBasedStorageTest.kt$import org.junit.jupiter.api.Assertions.*</ID>
+    <ID>WildcardImport:HashMapTimeBasedStorageTest.kt$import org.junit.jupiter.api.Assertions.*</ID>
+    <ID>WildcardImport:RBTreeTimeBasedStorageTest.kt$import org.junit.jupiter.api.Assertions.*</ID>
+    <ID>WildcardImport:ThreadSafeTimeBasedStorageTest.kt$import org.junit.jupiter.api.Assertions.*</ID>
+    <ID>WildcardImport:TimeBasedStoragesTest.kt$import org.junit.jupiter.api.Assertions.*</ID>
+  </CurrentIssues>
+</SmellBaseline>
