@@ -12,7 +12,7 @@ import kotlin.system.measureNanoTime
  */
 object PerformanceBenchmark {
     
-    private const val EVENTS_COUNT = 10_000
+    private const val EVENTS_COUNT = 1_000_000
     private const val QUERY_COUNT = 100
     
     /**
@@ -95,8 +95,9 @@ object PerformanceBenchmark {
         println("Events: $EVENTS_COUNT, Queries: $QUERY_COUNT")
         
         // Run benchmarks for different implementations
-        runBenchmark("Dictionary Implementation", TimeBasedStorages.createDictionaryStorage())
+        runBenchmark("HashMap Implementation", TimeBasedStorages.createHashMapStorage())
         runBenchmark("Red-Black Tree Implementation", TimeBasedStorages.createRBTreeStorage())
+        runBenchmark("B-Tree Implementation", TimeBasedStorages.createBTreeStorage())
         
         // Force GC before exit to get accurate memory usage if we want to add that later
         System.gc()

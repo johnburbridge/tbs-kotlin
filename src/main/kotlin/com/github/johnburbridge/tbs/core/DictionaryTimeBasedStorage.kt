@@ -13,7 +13,7 @@ import kotlin.random.Random
  * Timestamps have nanosecond precision.
  * When adding items rapidly, consider using addUniqueTimestamp() to avoid collisions.
  */
-class DictionaryTimeBasedStorage<T> : TimeBasedStorage<T> {
+class HashMapTimeBasedStorage<T> : TimeBasedStorage<T> {
     
     private val storage = HashMap<Instant, T>()
 
