@@ -219,4 +219,139 @@ class ThreadSafeTimeBasedStorageTest {
         
         thread.join()
     }
+    
+    @Test
+    fun `test addUniqueTimestamp`() {
+        val now = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+        
+        // Add initial value
+        storage.add(now, "first value")
+        
+        // Try to add to the same timestamp with addUniqueTimestamp
+        val newTimestamp = storage.addUniqueTimestamp(now, "second value", 1)
+        
+        // Check that the new timestamp is different
+        assertNotEquals(now, newTimestamp)
+        
+        // Check both values are present
+        assertEquals("first value", storage.getValueAt(now))
+        assertEquals("second value", storage.getValueAt(newTimestamp))
+        assertEquals(2, storage.size())
+    }
+    
+    @Test
+    fun `test getRange`() {
+        val now = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+        
+        // Add test data
+        storage.add(now.minusSeconds(10), "value1")
+        storage.add(now.minusSeconds(5), "value2")
+        storage.add(now, "value3")
+        storage.add(now.plusSeconds(5), "value4")
+        storage.add(now.plusSeconds(10), "value5")
+        
+        // Get range from -7 seconds to +7 seconds
+        val rangeValues = storage.getRange(now.minusSeconds(7), now.plusSeconds(7))
+        
+        // Expect 3 values: value2, value3, value4
+        assertEquals(3, rangeValues.size)
+        assertTrue(rangeValues.contains("value2"))
+        assertTrue(rangeValues.contains("value3"))
+        assertTrue(rangeValues.contains("value4"))
+        
+        // Test empty range
+        val emptyRange = storage.getRange(now.minusSeconds(100), now.minusSeconds(50))
+        assertTrue(emptyRange.isEmpty())
+    }
+    
+    @Test
+    fun `test getDuration`() {
+        // Use a fixed reference time instead of Instant.now()
+        val referenceTime = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+        
+        // Add test data with explicit timestamps relative to reference time
+        storage.add(referenceTime.minusSeconds(30), "old value")
+        storage.add(referenceTime.minusSeconds(10), "recent value")
+        storage.add(referenceTime.minusSeconds(5), "very recent value")
+        storage.add(referenceTime, "current value")
+        
+        // Instead of testing getDuration directly which uses Instant.now(),
+        // we'll test getRange which is what getDuration uses internally
+        val duration = Duration.ofSeconds(15)
+        val from = referenceTime.minus(duration)
+        val recentValues = storage.getRange(from, referenceTime)
+        
+        // Expect 3 values (the ones within last 15 seconds)
+        assertEquals(3, recentValues.size)
+        assertTrue(recentValues.contains("recent value"))
+        assertTrue(recentValues.contains("very recent value"))
+        assertTrue(recentValues.contains("current value"))
+        assertFalse(recentValues.contains("old value"))
+        
+        // Test zero duration case
+        val zeroDurationValues = storage.getRange(referenceTime, referenceTime)
+        assertEquals(1, zeroDurationValues.size)
+        assertTrue(zeroDurationValues.contains("current value"))
+    }
+    
+    @Test
+    fun `test clear`() {
+        val now = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+        
+        // Add test data
+        storage.add(now.minusSeconds(10), "value1")
+        storage.add(now, "value2")
+        storage.add(now.plusSeconds(10), "value3")
+        
+        assertEquals(3, storage.size())
+        
+        // Clear the storage
+        storage.clear()
+        
+        // Verify the storage is empty
+        assertEquals(0, storage.size())
+        assertTrue(storage.isEmpty())
+        assertNull(storage.getValueAt(now))
+    }
+    
+    @Test
+    fun `test getTimestamps`() {
+        val now = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+        
+        // Add test data with specific timestamps
+        val timestamp1 = now.minusSeconds(10)
+        val timestamp2 = now
+        val timestamp3 = now.plusSeconds(10)
+        
+        storage.add(timestamp1, "value1")
+        storage.add(timestamp2, "value2")
+        storage.add(timestamp3, "value3")
+        
+        // Get all timestamps
+        val timestamps = storage.getTimestamps()
+        
+        // Verify the timestamps
+        assertEquals(3, timestamps.size)
+        assertTrue(timestamps.contains(timestamp1))
+        assertTrue(timestamps.contains(timestamp2))
+        assertTrue(timestamps.contains(timestamp3))
+    }
+    
+    @Test
+    fun `test waitForData with default timeout`() {
+        // Start a thread that will add data after a delay
+        val thread = Thread {
+            Thread.sleep(200)
+            storage.add(Instant.now(), "delayed value")
+        }
+        thread.start()
+        
+        // Wait for data with default timeout (should use null)
+        val result = storage.waitForData()
+        
+        assertTrue(result, "Should return true when data is added")
+        assertEquals(1, storage.size())
+        
+        thread.join()
+    }
 } 
