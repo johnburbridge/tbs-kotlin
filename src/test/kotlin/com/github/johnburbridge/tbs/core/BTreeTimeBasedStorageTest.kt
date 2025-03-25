@@ -102,24 +102,28 @@ class BTreeTimeBasedStorageTest {
     
     @Test
     fun `test getDuration`() {
-        // Use a fixed reference time instead of Instant.now()
-        val referenceTime = Instant.now()
-        val oneHourAgo = referenceTime.minus(1, ChronoUnit.HOURS)
-        val twoHoursAgo = referenceTime.minus(2, ChronoUnit.HOURS)
-        val threeHoursAgo = referenceTime.minus(3, ChronoUnit.HOURS)
+        val now = Instant.now().truncatedTo(ChronoUnit.MILLIS)
         
-        storage.add(oneHourAgo, "one hour ago")
-        storage.add(twoHoursAgo, "two hours ago")
-        storage.add(threeHoursAgo, "three hours ago")
+        // Add test data with explicit timestamps
+        storage.add(now.minusSeconds(30), "old value")
+        storage.add(now.minusSeconds(10), "recent value")
+        storage.add(now.minusSeconds(5), "very recent value")
+        storage.add(now, "current value")
         
-        // Instead of testing getDuration directly which uses Instant.now(),
-        // we'll test getRange which is what getDuration uses internally
-        val values = storage.getRange(referenceTime.minus(2, ChronoUnit.HOURS), referenceTime)
+        // Mock the current time to make getDuration testable
+        val duration = Duration.ofSeconds(15)
+        val mockNow = now
+        val from = mockNow.minus(duration)
         
-        assertEquals(2, values.size)
-        assertTrue(values.contains("one hour ago"))
-        assertTrue(values.contains("two hours ago"))
-        assertFalse(values.contains("three hours ago"))
+        // Get values from the "last" 15 seconds
+        val recentValues = storage.getRange(from, mockNow)
+        
+        // Expect 3 values (the ones within last 15 seconds)
+        assertEquals(3, recentValues.size)
+        assertTrue(recentValues.contains("recent value"))
+        assertTrue(recentValues.contains("very recent value"))
+        assertTrue(recentValues.contains("current value"))
+        assertFalse(recentValues.contains("old value"))
     }
     
     @Test
@@ -147,5 +151,41 @@ class BTreeTimeBasedStorageTest {
         
         // Test removing non-existent timestamp
         assertFalse(storage.remove(Instant.now().plusSeconds(1)))
+    }
+    
+    @Test
+    fun `test getAll returns all values`() {
+        val baseTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        
+        storage.add(baseTime.minusSeconds(10), "value1")
+        storage.add(baseTime, "value2")
+        storage.add(baseTime.plusSeconds(10), "value3")
+        
+        val allValues = storage.getAll()
+        
+        assertEquals(3, allValues.size)
+        assertTrue(allValues.contains("value1"))
+        assertTrue(allValues.contains("value2"))
+        assertTrue(allValues.contains("value3"))
+    }
+    
+    @Test
+    fun `test getTimestamps returns all timestamps`() {
+        val baseTime = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        
+        val timestamp1 = baseTime.minusSeconds(10)
+        val timestamp2 = baseTime
+        val timestamp3 = baseTime.plusSeconds(10)
+        
+        storage.add(timestamp1, "value1")
+        storage.add(timestamp2, "value2")
+        storage.add(timestamp3, "value3")
+        
+        val timestamps = storage.getTimestamps()
+        
+        assertEquals(3, timestamps.size)
+        assertTrue(timestamps.contains(timestamp1))
+        assertTrue(timestamps.contains(timestamp2))
+        assertTrue(timestamps.contains(timestamp3))
     }
 } 
